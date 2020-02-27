@@ -20,6 +20,7 @@ def sentiment_analyzer_scores(sentence, verbose=False):
     if verbose: print("{}".format(str(score)))
     
     return score
+    # return pd.Series([score['neg'], score['neu'], score['pos'], score['compound']])
     
 def sentiment_emoji(compound_score):
     if compound_score == 1: return '😊'
@@ -39,10 +40,23 @@ def sentiment_analyzer_scores_compound(sentence):
     return sentiment_analyzer_scores(sentence)['compound']
 
 def append_sentiment_scores(df):
-    df['neg'] = df['review_fulltext'].apply(sentiment_analyzer_scores_neg)
-    df['neu'] = df['review_fulltext'].apply(sentiment_analyzer_scores_neu)
-    df['pos'] = df['review_fulltext'].apply(sentiment_analyzer_scores_pos)
-    df['compound'] = df['review_fulltext'].apply(sentiment_analyzer_scores_compound)
+    scores = df['review_fulltext'].apply(sentiment_analyzer_scores)
+
+    df['neg'] = [ s['neg'] for s in scores ]
+    df['neu'] = [ s['neu'] for s in scores ]
+    df['pos'] = [ s['pos'] for s in scores ]
+    df['compound'] = [ s['compound'] for s in scores ]
+    
+    
+    
+#     df['neu'] = df['review_fulltext'].apply(sentiment_analyzer_scores_neu)
+#     df['pos'] = df['review_fulltext'].apply(sentiment_analyzer_scores_pos)
+#     df['compound'] = df['review_fulltext'].apply(sentiment_analyzer_scores_compound)
+    
+#     df['neg'] = df['review_fulltext'].apply(sentiment_analyzer_scores_neg)
+#     df['neu'] = df['review_fulltext'].apply(sentiment_analyzer_scores_neu)
+#     df['pos'] = df['review_fulltext'].apply(sentiment_analyzer_scores_pos)
+#     df['compound'] = df['review_fulltext'].apply(sentiment_analyzer_scores_compound)
         
     return df
 
