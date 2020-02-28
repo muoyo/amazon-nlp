@@ -26,6 +26,39 @@ from data_cleaning import *
 from classification import *
 from visualizations import *
 
+
+st.title('Customer Conversation Classifier')
+st.subheader('Do your customers love you, or nah?')
+
+txt = st.text_area('Paste an Amazon review here...', '', key='textarea')
+score = sentiment_analyzer_scores(txt)
+
+if (st.button('Submit')): score = sentiment_analyzer_scores(txt)
+
+    
+    
+clf_forest =  pickle.load( open( "../models/save.forest", "rb" ))
+
+X_txt = pd.DataFrame({'review_fulltext': [txt]})
+X_txt = append_sentiment_scores(X_txt)
+
+
+if txt.strip() == '': 
+    y_pred = 0.5
+    msg = "Very neutral customer comment. I really can't call it."
+else: 
+    y_pred = clf_forest.predict(X_txt.drop(columns='review_fulltext'))[0]
+    if y_pred == 0: msg = "This customer may not be the happiest."
+    else:  msg = 'This customer seems pleased. Congratulations!'
+st.header(sentiment_emoji(y_pred))
+st.subheader(msg)
+
+st.write(score)
+X_txt
+    
+
+
+
 # Read in original data
 # df_full = pd.read_csv('https://s3.amazonaws.com/amazon-reviews-pds/tsv/amazon_reviews_us_Watches_v1_00.tsv.gz', sep='\t', error_bad_lines=False, warn_bad_lines=False)
 
@@ -40,26 +73,23 @@ from visualizations import *
 
 # df = append_sentiment_scores(df)
 
-df = pickle.load( open( "../notebooks/save.df", "rb" ) )
+# df = pickle.load( open( "../notebooks/save.df", "rb" ) )
 
-X_train, X_test, y_train, y_test = get_train_test_split(df, test_size=.25)
-y_train.value_counts()
-
-
-X_train_numeric = X_train.select_dtypes(include=[np.number])
-X_test_numeric = X_test.select_dtypes(include=[np.number])
+# X_train, X_test, y_train, y_test = get_train_test_split(df, test_size=.25)
+# y_train.value_counts()
 
 
-from imblearn.under_sampling import RandomUnderSampler
+# X_train_numeric = X_train.select_dtypes(include=[np.number])
+# X_test_numeric = X_test.select_dtypes(include=[np.number])
 
-rus = RandomUnderSampler()
-X_train_resampled, y_train_resampled = rus.fit_resample(X_train_numeric, y_train)
 
-st.title('Customer Conversation Classifier')
-st.subheader('Do your customers love you, or nah?')
+# from imblearn.under_sampling import RandomUnderSampler
 
-txt = st.text_area('Paste an Amazon review here...', '')
-score = sentiment_analyzer_scores(txt)
+# rus = RandomUnderSampler()
+# X_train_resampled, y_train_resampled = rus.fit_resample(X_train_numeric, y_train)
+
+    
+    
 
 
 # # Logistic Regression
@@ -107,27 +137,10 @@ score = sentiment_analyzer_scores(txt)
 # st.pyplot()
 
 
-# Bagged Trees
-clf_bagged = BaggingClassifier(DecisionTreeClassifier(criterion='gini', max_leaf_nodes=100), 
-                                 n_estimators=20)
-clf_bagged.fit(X_train_resampled, y_train_resampled)
-
-X_txt = pd.DataFrame({'review_fulltext': [txt]})
-X_txt = append_sentiment_scores(X_txt)
-
-
-if txt.strip() == '': 
-    y_pred = 0.5
-    msg = "Very neutral customer comment. I really can't call it."
-else: 
-    y_pred = clf_bagged.predict(X_txt.drop(columns='review_fulltext'))[0]
-    if y_pred == 0: msg = "This customer may not be the happiest."
-    else:  msg = 'This customer seems pleased. Congratulations!'
-st.header(sentiment_emoji(y_pred))
-st.subheader(msg)
-
-st.write(score)
-X_txt
+# # Bagged Trees
+# clf_bagged = BaggingClassifier(DecisionTreeClassifier(criterion='gini', max_leaf_nodes=100), 
+#                                  n_estimators=20)
+# clf_bagged.fit(X_train_resampled, y_train_resampled)
 
 # y_hat_bagged_train = clf_bagged.predict(X_train_resampled)
 # st.write(classification_report(y_train_resampled, y_hat_bagged_train))
@@ -149,8 +162,8 @@ X_txt
 # show_confusion_matrix(clf_forest, X_train_resampled, y_train_resampled, title='Random Forest - Training Set (Normalized)')
 # st.pyplot()
 
-# y_hat_forest_test = clf_forest.predict(X_test_numeric)
-# st.write(classification_report(y_test, y_hat_forest_test))
+# # y_hat_forest_test = clf_forest.predict(X_test_numeric)
+# # st.write(classification_report(y_test, y_hat_forest_test))
 # show_confusion_matrix(clf_forest, X_test_numeric, y_test, title='Random Forest - Test Set (Normalized)')
 # st.pyplot()
 
