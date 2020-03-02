@@ -4,6 +4,7 @@
 This module contains functions for dealing with Natural Language Processing (NLP)
 
 """
+import time as time
 import pandas as pd
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
@@ -20,7 +21,6 @@ def sentiment_analyzer_scores(sentence, verbose=False):
     if verbose: print("{}".format(str(score)))
     
     return score
-    # return pd.Series([score['neg'], score['neu'], score['pos'], score['compound']])
     
 def sentiment_emoji(compound_score):
     if compound_score == 1: return '😊'
@@ -40,6 +40,9 @@ def sentiment_analyzer_scores_compound(sentence):
     return sentiment_analyzer_scores(sentence)['compound']
 
 def append_sentiment_scores(df):
+    
+    start = time.time()
+    
     scores = df['review_fulltext'].apply(sentiment_analyzer_scores)
 
     df['neg'] = [ s['neg'] for s in scores ]
@@ -47,18 +50,35 @@ def append_sentiment_scores(df):
     df['pos'] = [ s['pos'] for s in scores ]
     df['compound'] = [ s['compound'] for s in scores ]
     
-    
-    
-#     df['neu'] = df['review_fulltext'].apply(sentiment_analyzer_scores_neu)
-#     df['pos'] = df['review_fulltext'].apply(sentiment_analyzer_scores_pos)
-#     df['compound'] = df['review_fulltext'].apply(sentiment_analyzer_scores_compound)
-    
-#     df['neg'] = df['review_fulltext'].apply(sentiment_analyzer_scores_neg)
-#     df['neu'] = df['review_fulltext'].apply(sentiment_analyzer_scores_neu)
-#     df['pos'] = df['review_fulltext'].apply(sentiment_analyzer_scores_pos)
-#     df['compound'] = df['review_fulltext'].apply(sentiment_analyzer_scores_compound)
-        
+    print(time.time() - start)
+            
     return df
+
+def append_sentiment_scores2(df):
+    
+    start = time.time()
+    
+    neg = []
+    neu = []
+    pos = []
+    compound = []
+    
+    for review in df['review_fulltext']:
+        scores = sentiment_analyzer_scores(review)
+        neg.append(scores['neg'])
+        neu.append(scores['neu'])
+        pos.append(scores['pos'])
+        compound.append(scores['compound'])
+    
+    df['neg'] = neg
+    df['neu'] = neu
+    df['pos'] = pos
+    df['compound'] = compound
+    
+    print(time.time() - start)
+    
+    return df
+
 
 def get_vectorized_features(X_train, X_test):
     word_tokenizer = RegexpTokenizer(r'\w+')
