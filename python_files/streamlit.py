@@ -57,12 +57,3 @@ if (st.button('Let me know!')):
     ax.set_yticklabels(['Negative', 'Neutral', 'Positive', 'Overall'])
     sns.despine()
     st.pyplot()
-
-#     doc = nlp(txt)
-    
-#     # st.write(spacy.displacy.render(doc, style='ent', jupyter=True))
-    
-#     # Iterate over the tokens
-#     for token in doc:
-#         # Print the text and the predicted part-of-speech tag
-#         st.write(token.text, token.pos_, token.dep_, token.head.text)
